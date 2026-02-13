@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Certificate | Trinidax School</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #c90d32;
+            --dark: #0f172a;
+            --success: #22c55e;
+            --glass: rgba(255, 255, 255, 0.95);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+            background: var(--glass);
+            padding: 3rem;
+            border-radius: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 500px;
+            border: 1px solid white;
+        }
+
+        h1 { color: var(--dark); margin-bottom: 0.5rem; }
+        p { color: #64748b; margin-bottom: 2rem; }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            background: white;
+            padding: 8px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            transition: 0.3s;
+        }
+
+        .search-box:focus-within { border-color: var(--primary); }
+
+        input {
+            border: none;
+            outline: none;
+            flex-grow: 1;
+            padding: 10px;
+            font-size: 1rem;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover { background: #97040b; }
+
+        /* Modal / Popup Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0; top: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(8px);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 2.5rem;
+            width: 90%;
+            max-width: 550px;
+            border-radius: 20px;
+            position: relative;
+            animation: slideUp 0.4s ease-out;
+            text-align: center;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .close { position: absolute; right: 20px; top: 15px; font-size: 28px; cursor: pointer; }
+
+        .badge {
+            display: inline-block;
+            background: #dcfce7;
+            color: #166534;
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Instruction Box Styling */
+        .instruction-icon { font-size: 50px; margin-bottom: 15px; display: block; }
+        .highlight-id { color: var(--primary); font-weight: 800; background: #fee2e2; padding: 2px 8px; border-radius: 4px; }
+
+        .preview-box {
+            width: 100%;
+            height: 300px;
+            background: #f1f5f9;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        .preview-box img { width: 100%; height: 100%; object-fit: contain; }
+
+        .btn-download {
+            display: block;
+            background: var(--dark);
+            color: white;
+            text-decoration: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img src="/logo.png" alt="Trinidax Logo" style="width: 100px; margin-bottom: 1rem;">
+    <h1>Certificate Verification</h1>
+    <p>Securely validate Trinidax academic records.</p>
+    
+    <div class="search-box">
+        <input type="text" id="certInput" placeholder="Enter ID (e.g. TRIN-00-00)" onkeypress="if(event.key === 'Enter') checkID()">
+        <button onclick="checkID()">Verify</button>
+    </div>
+</div>
+
+<div id="resultModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        
+        <div id="instructionContent" style="display: none;">
+            <span class="instruction-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" style="width: 60px;" viewBox="0 0 640 640">
+                    <path fill="#e61010" d="M320 64C334.7 64 348.2 72.1 355.2 85L571.2 485C577.9 497.4 577.6 512.4 570.4 524.5C563.2 536.6 550.1 544 536 544L104 544C89.9 544 76.8 536.6 69.6 524.5C62.4 512.4 62.1 497.4 68.8 485L284.8 85C291.8 72.1 305.3 64 320 64zM320 416C302.3 416 288 430.3 288 448C288 465.7 302.3 480 320 480C337.7 480 352 465.7 352 448C352 430.3 337.7 416 320 416zM320 224C301.8 224 287.3 239.5 288.6 257.7L296 361.7C296.9 374.2 307.4 384 319.9 384C332.5 384 342.9 374.3 343.8 361.7L351.2 257.7C352.5 239.5 338.1 224 319.8 224z"/>
+                </svg>
+            </span>
+            <h2 style="color: var(--dark);">How to Verify</h2>
+            <p style="font-size: 1.1rem; line-height: 1.6;">
+                Check below the <strong>QR Code</strong> on your physical certificate. 
+                You will see a code like <span class="highlight-id">TRIN-00-00</span>. 
+                Input it in the search box to view your record online.
+            </p>
+            <button onclick="closeModal()" style="background: var(--dark); color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%;">Got it!</button>
+        </div>
+
+        <div id="successContent" style="display: none;">
+            <div class="badge">✓ AUTHENTICATED BY TRINIDAX</div>
+            <h2 id="studentName" style="margin:10px 0;">Student Name</h2>
+            <p id="courseName" style="margin:0;">Course Name</p>
+            <div class="preview-box">
+                <img id="certPreview" src="" alt="Certificate Preview">
+            </div>
+            <a id="pdfLink" href="#" class="btn-download" download>Download Official PDF</a>
+        </div>
+
+        <div id="errorContent" style="display: none;">
+            <span style="font-size: 48px;"style="color: #b91c1c; margin-bottom: 15px; display: block;">
+                <svg xmlns="http://www.w3.org/2000/svg" style="width: 70px; " viewBox="0 0 640 640">
+                    <path fill="#e61010" d="M431.2 476.5L163.5 208.8C141.1 240.2 128 278.6 128 320C128 426 214 512 320 512C361.5 512 399.9 498.9 431.2 476.5zM476.5 431.2C498.9 399.8 512 361.4 512 320C512 214 426 128 320 128C278.5 128 240.1 141.1 208.8 163.5L476.5 431.2zM64 320C64 178.6 178.6 64 320 64C461.4 64 576 178.6 576 320C576 461.4 461.4 576 320 576C178.6 576 64 461.4 64 320z"/>
+                </svg>
+            </span>
+            <h2 style="color: #b91c1c;">Certificate Not Found</h2>
+            <p id="errorMessage" style="color: #64748b; margin-bottom: 20px;">The ID you entered does not match any record. Please check and try again.
+            If you believe this is an error, <a href="#" style="color: var(--primary); text-decoration: underline;">contact support</a> with your certificate details.</p>
+            <button onclick="closeModal()" style="background: var(--primary); color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: 600; cursor: pointer;">Try Again</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const database = {
+        "TRIN-26-001": {
+            name: "Alfred Godwin",
+            course: "Full-Stack Web Engineering",
+            preview: "/trinidax school certificate.jpg", 
+            pdf: "/trinidax.pdf" 
+        },
+        "TRIN-26-002": {
+            name: "Emily Chen",
+            course: "Data Science & AI",
+            preview: "/trinidax school certificate.jpg", 
+            pdf: "/trinidax.pdf" 
+        },
+        "TRIN-26-003": {
+            name: "Michael Lee",
+            course: "Cybersecurity Fundamentals",
+            preview: "/trinidax school certificate.jpg", 
+            pdf: "/trinidax.pdf" 
+        }
+    };
+
+    // --- AUTO POPUP LOGIC ---
+    window.onload = function() {
+        // Track refreshes using localStorage
+        let refreshCount = localStorage.getItem('refreshCount') || 0;
+        refreshCount++;
+        localStorage.setItem('refreshCount', refreshCount);
+
+        // Logic: Popup every 2nd refresh
+        if (refreshCount % 2 === 0) {
+            setTimeout(showInstructions, 4000); // 4 Second delay
+        }
+    };
+
+    function showInstructions() {
+        const modal = document.getElementById('resultModal');
+        const instructionDiv = document.getElementById('instructionContent');
+        const successDiv = document.getElementById('successContent');
+        const errorDiv = document.getElementById('errorContent');
+
+        instructionDiv.style.display = 'block';
+        successDiv.style.display = 'none';
+        errorDiv.style.display = 'none';
+        modal.style.display = "block";
+    }
+
+    function checkID() {
+        const id = document.getElementById('certInput').value.trim().toUpperCase();
+        const modal = document.getElementById('resultModal');
+        const successDiv = document.getElementById('successContent');
+        const errorDiv = document.getElementById('errorContent');
+        const instructionDiv = document.getElementById('instructionContent');
+
+        instructionDiv.style.display = 'none'; // Hide instructions if user is searching
+
+        if (database[id]) {
+            document.getElementById('studentName').innerText = database[id].name;
+            document.getElementById('courseName').innerText = database[id].course;
+            document.getElementById('certPreview').src = database[id].preview;
+            document.getElementById('pdfLink').href = database[id].pdf;
+            successDiv.style.display = 'block';
+            errorDiv.style.display = 'none';
+        } else {
+            successDiv.style.display = 'none';
+            errorDiv.style.display = 'block';
+        }
+        modal.style.display = "block";
+    }
+
+    function closeModal() {
+        document.getElementById('resultModal').style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        if (event.target == document.getElementById('resultModal')) {
+            closeModal();
+        }
+    }
+</script>
+
+</body>
+</html>
