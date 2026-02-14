@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Verify Certificate | Trinidax School</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -13,28 +13,59 @@
             --glass: rgba(255, 255, 255, 0.95);
         }
 
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            margin: 0;
+            background-image: url('https://res.cloudinary.com/dmrhe3chc/image/upload/v1770999319/trinidax_school_certificate_suu4u7.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.63);
+            backdrop-filter: blur(8px);
+            z-index: -1;
+        }
+
+        body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        body::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        body::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+
+        body::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
         }
 
         .container {
             text-align: center;
             background: var(--glass);
-            padding: 3rem;
+            padding: 2rem 1.5rem;
             border-radius: 24px;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-            width: 90%;
+            width: 100%;
             max-width: 500px;
             border: 1px solid white;
         }
 
-        h1 { color: var(--dark); margin-bottom: 0.5rem; }
+        h1 { color: var(--dark); margin-bottom: 0.5rem; font-size: 1.8rem; }
         p { color: #64748b; margin-bottom: 2rem; }
 
         .search-box {
@@ -48,6 +79,7 @@
         }
 
         .search-box:focus-within { border-color: var(--primary); }
+        .search-box.disabled { opacity: 0.6; pointer-events: none; }
 
         input {
             border: none;
@@ -55,22 +87,32 @@
             flex-grow: 1;
             padding: 10px;
             font-size: 1rem;
+            background: transparent;
+            min-width: 0;
         }
 
         button {
             background: var(--primary);
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 12px 20px;
             border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
             transition: 0.2s;
+            white-space: nowrap;
+        }
+        button:hover { background: #97040b; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .lockout-message {
+            margin-top: 1rem;
+            color: #b91c1c;
+            font-weight: 600;
+            font-size: 0.9rem;
         }
 
-        button:hover { background: #97040b; }
-
-        /* Modal / Popup Styles */
+        /* Modal base */
         .modal {
             display: none;
             position: fixed;
@@ -78,14 +120,16 @@
             left: 0; top: 0; width: 100%; height: 100%;
             background: rgba(15, 23, 42, 0.8);
             backdrop-filter: blur(8px);
+            overflow-y: auto;
+            padding: 1rem;
         }
 
         .modal-content {
             background: white;
-            margin: 5% auto;
-            padding: 2.5rem;
-            width: 90%;
-            max-width: 550px;
+            margin: 2rem auto;
+            padding: 2rem 1.5rem;
+            width: 100%;
+            max-width: 800px;
             border-radius: 20px;
             position: relative;
             animation: slideUp 0.4s ease-out;
@@ -97,7 +141,14 @@
             to { transform: translateY(0); opacity: 1; }
         }
 
-        .close { position: absolute; right: 20px; top: 15px; font-size: 28px; cursor: pointer; }
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            font-size: 28px;
+            cursor: pointer;
+            line-height: 1;
+        }
 
         .badge {
             display: inline-block;
@@ -110,55 +161,140 @@
             margin-bottom: 1rem;
         }
 
-        /* Instruction Box Styling */
+        /* Instruction box */
         .instruction-icon { font-size: 50px; margin-bottom: 15px; display: block; }
-        .highlight-id { color: var(--primary); font-weight: 800; background: #fee2e2; padding: 2px 8px; border-radius: 4px; }
+        .highlight-id {
+            color: var(--primary);
+            font-weight: 800;
+            background: #fee2e2;
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        /* Responsive grid for certificate + QR */
+        .cert-grid {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+            align-items: center;
+        }
+        .cert-left { flex: 1; }
+        .cert-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
 
         .preview-box {
             width: 100%;
-            height: 300px;
             background: #f1f5f9;
             border-radius: 12px;
-            margin: 1.5rem 0;
             overflow: hidden;
             border: 1px solid #e2e8f0;
+            aspect-ratio: 16 / 9;
+        }
+        .preview-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
-        .preview-box img { width: 100%; height: 100%; object-fit: contain; }
-
-        .btn-download {
-            display: block;
-            background: var(--dark);
-            color: white;
-            text-decoration: none;
-            padding: 15px;
+        .qr-code {
+            width: 100%;
+            max-width: 180px;
+            height: auto;
+            aspect-ratio: 1;
+            border: 2px solid #e2e8f0;
             border-radius: 12px;
+            padding: 8px;
+            background: white;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .button-group button {
+            flex: 1 1 150px;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
             font-weight: 600;
-            margin-top: 1rem;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+        .btn-view { background: var(--dark); color: white; }
+        .btn-download { background: var(--primary); color: white; }
+
+        /* Warning modal */
+        .warning-modal .modal-content { max-width: 450px; }
+
+        /* Responsive breakpoints */
+        @media (max-width: 600px) {
+            body {
+                padding: 0.5rem;
+                background-position: center;
+                background-repeat: no-repeat;
+            }
+            .cert-grid {
+                flex-direction: column;
+                gap: 20px;
+            }
+            .cert-right {
+                width: 100%;
+            }
+            .qr-code {
+                max-width: 150px;
+            }
+            .modal-content {
+                padding: 1.5rem 1rem;
+                margin: 1rem auto;
+            }
+            h1 { font-size: 1.5rem; }
+            .button-group button {
+                flex: 1 1 100%;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .search-box {
+                flex-wrap: wrap;
+            }
+            .search-box button {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <img src="/logo.png" alt="Trinidax Logo" style="width: 100px; margin-bottom: 1rem;">
+    <img src="https://res.cloudinary.com/dmrhe3chc/image/upload/v1771003521/logo_lpbscq.png" alt="Trinidax Logo" style="width: 150px; margin-bottom: 1rem;">
     <h1>Certificate Verification</h1>
     <p>Securely validate Trinidax academic records.</p>
     
-    <div class="search-box">
+    <div class="search-box" id="searchBox">
         <input type="text" id="certInput" placeholder="Enter ID (e.g. TRIN-00-00)" onkeypress="if(event.key === 'Enter') checkID()">
-        <button onclick="checkID()">Verify</button>
+        <button onclick="checkID()" id="verifyBtn">Verify</button>
     </div>
+    <div id="lockoutMessage" class="lockout-message"></div>
 </div>
 
+<!-- Main result modal (instructions / success / error) -->
 <div id="resultModal" class="modal">
     <div class="modal-content">
-        <span class="close" onclick="closeModal()">&times;</span>
+        <span class="close" onclick="closeModal('resultModal')">&times;</span>
         
+        <!-- Instruction content (auto popup) -->
         <div id="instructionContent" style="display: none;">
             <span class="instruction-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" style="width: 60px;" viewBox="0 0 640 640">
-                    <path fill="#e61010" d="M320 64C334.7 64 348.2 72.1 355.2 85L571.2 485C577.9 497.4 577.6 512.4 570.4 524.5C563.2 536.6 550.1 544 536 544L104 544C89.9 544 76.8 536.6 69.6 524.5C62.4 512.4 62.1 497.4 68.8 485L284.8 85C291.8 72.1 305.3 64 320 64zM320 416C302.3 416 288 430.3 288 448C288 465.7 302.3 480 320 480C337.7 480 352 465.7 352 448C352 430.3 337.7 416 320 416zM320 224C301.8 224 287.3 239.5 288.6 257.7L296 361.7C296.9 374.2 307.4 384 319.9 384C332.5 384 342.9 374.3 343.8 361.7L351.2 257.7C352.5 239.5 338.1 224 319.8 224z"/>
+                <svg xmlns="http://www.w3.org/2000/svg" style="width: 70px;" viewBox="0 0 640 640">
+                    <path fill="rgba(1, 2, 3, 1.00)" d="M568.4 196.5C563.9 207 550 206.3 543.5 196.9C515.7 156.9 477.4 124.7 432.5 104.3C422.1 99.6 418.8 86 428.4 79.7C443.4 69.8 461.4 64 480.7 64C533.3 64 575.9 106.6 575.9 159.2C575.9 172.4 573.2 185 568.3 196.5zM96.5 196.9C90 206.3 76 207 71.6 196.5C66.7 185 64 172.4 64 159.2C64 106.6 106.6 64 159.2 64C178.5 64 196.5 69.8 211.5 79.7C221.1 86 217.8 99.6 207.4 104.3C162.6 124.7 124.3 156.9 96.4 196.9zM454.2 531.4C416.8 559.4 370.3 576 320 576C269.7 576 223.2 559.4 185.9 531.4L150.6 566.6C138.1 579.1 117.8 579.1 105.3 566.6C92.8 554.1 92.8 533.8 105.3 521.3L140.5 486.1C112.6 448.8 96 402.3 96 352C96 228.3 196.3 128 320 128C443.7 128 544 228.3 544 352C544 402.3 527.4 448.8 499.4 486.2L534.6 521.4C547.1 533.9 547.1 554.2 534.6 566.7C522.1 579.2 501.8 579.2 489.3 566.7L454.1 531.5zM344 248C344 234.7 333.3 224 320 224C306.7 224 296 234.7 296 248L296 352C296 358.4 298.5 364.5 303 369L359 425C368.4 434.4 383.6 434.4 392.9 425C402.2 415.6 402.3 400.4 392.9 391.1L343.9 342.1L343.9 248z"/>
                 </svg>
             </span>
             <h2 style="color: var(--dark);">How to Verify</h2>
@@ -167,111 +303,299 @@
                 You will see a code like <span class="highlight-id">TRIN-00-00</span>. 
                 Input it in the search box to view your record online.
             </p>
-            <button onclick="closeModal()" style="background: var(--dark); color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%;">Got it!</button>
+            <button onclick="closeModal('resultModal')" style="background: var(--dark); color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%;">Got it!</button>
         </div>
 
+        <!-- Success content with QR code and two buttons -->
         <div id="successContent" style="display: none;">
             <div class="badge">✓ AUTHENTICATED BY TRINIDAX</div>
             <h2 id="studentName" style="margin:10px 0;">Student Name</h2>
             <p id="courseName" style="margin:0;">Course Name</p>
-            <div class="preview-box">
-                <img id="certPreview" src="" alt="Certificate Preview">
+
+            <div class="cert-grid">
+                <div class="cert-left">
+                    <div class="preview-box">
+                        <img id="certPreview" src="" alt="Certificate Preview">
+                    </div>
+                </div>
+                <div class="cert-right">
+                    <!-- QR Code image: uses static image if provided in database, otherwise dynamic -->
+                    <img id="qrCodeImg" class="qr-code" src="" alt="QR Code">
+                    <p style="margin-top: 10px; color: #64748b;">Scan to verify</p>
+                </div>
             </div>
-            <a id="pdfLink" href="#" class="btn-download" download>Download Official PDF</a>
+
+            <div class="button-group">
+                <button class="btn-view" onclick="viewCertificate()">View Certificate</button>
+                <button class="btn-download" onclick="downloadCertificate()">Download Certificate</button>
+            </div>
         </div>
 
+        <!-- Error content -->
         <div id="errorContent" style="display: none;">
-            <span style="font-size: 48px;"style="color: #b91c1c; margin-bottom: 15px; display: block;">
-                <svg xmlns="http://www.w3.org/2000/svg" style="width: 70px; " viewBox="0 0 640 640">
+            <span style="font-size: 48px; display: block; margin-bottom: 15px;">
+                <svg xmlns="http://www.w3.org/2000/svg" style="width: 70px;" viewBox="0 0 640 640">
                     <path fill="#e61010" d="M431.2 476.5L163.5 208.8C141.1 240.2 128 278.6 128 320C128 426 214 512 320 512C361.5 512 399.9 498.9 431.2 476.5zM476.5 431.2C498.9 399.8 512 361.4 512 320C512 214 426 128 320 128C278.5 128 240.1 141.1 208.8 163.5L476.5 431.2zM64 320C64 178.6 178.6 64 320 64C461.4 64 576 178.6 576 320C576 461.4 461.4 576 320 576C178.6 576 64 461.4 64 320z"/>
                 </svg>
             </span>
             <h2 style="color: #b91c1c;">Certificate Not Found</h2>
             <p id="errorMessage" style="color: #64748b; margin-bottom: 20px;">The ID you entered does not match any record. Please check and try again.
-            If you believe this is an error, <a href="#" style="color: var(--primary); text-decoration: underline;">contact support</a> with your certificate details.</p>
-            <button onclick="closeModal()" style="background: var(--primary); color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: 600; cursor: pointer;">Try Again</button>
+            If you believe this is an error, <a href="#" style="color: var(--primary); text-decoration: underline;">contact support</a> with your certificate details at Trinidax School of Computer Studies. Jalingo Taraba State.</p>
+            <button onclick="closeModal('resultModal')" style="background: var(--primary); color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: 600; cursor: pointer;">Try Again</button>
+        </div>
+    </div>
+</div>
+
+<!-- Warning modal (for 3 wrong attempts or lockout) -->
+<div id="warningModal" class="modal warning-modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('warningModal')">&times;</span>
+        <div style="text-align: center;">
+            <span style="font-size: 48px;">
+                <svg xmlns="http://www.w3.org/2000/svg" style="width: 60px;" viewBox="0 0 640 640">
+                    <path fill="#e61010" d="M320 64C334.7 64 348.2 72.1 355.2 85L571.2 485C577.9 497.4 577.6 512.4 570.4 524.5C563.2 536.6 550.1 544 536 544L104 544C89.9 544 76.8 536.6 69.6 524.5C62.4 512.4 62.1 497.4 68.8 485L284.8 85C291.8 72.1 305.3 64 320 64zM320 416C302.3 416 288 430.3 288 448C288 465.7 302.3 480 320 480C337.7 480 352 465.7 352 448C352 430.3 337.7 416 320 416zM320 224C301.8 224 287.3 239.5 288.6 257.7L296 361.7C296.9 374.2 307.4 384 319.9 384C332.5 384 342.9 374.3 343.8 361.7L351.2 257.7C352.5 239.5 338.1 224 319.8 224z"/>
+                </svg>
+            </span>
+            <h2 id="warningTitle" style="color: #b91c1c; margin: 10px 0;">Warning</h2>
+            <p id="warningMessage" style="color: #334155; margin-bottom: 20px;"></p>
+            <button onclick="closeModal('warningModal')" style="background: var(--primary); color: white; border: none; padding: 10px 30px; border-radius: 8px; font-weight: 600; cursor: pointer;">OK</button>
         </div>
     </div>
 </div>
 
 <script>
+    // -------------------- DATABASE --------------------
+    // Each certificate can now have an optional 'qr' field containing the URL
+    // of a pre‑generated static QR code image (PNG, SVG, etc.).
+    // If 'qr' is provided, that image will be shown; otherwise a dynamic QR
+    // code is generated from the certificate ID.
     const database = {
         "TRIN-26-001": {
             name: "Alfred Godwin",
             course: "Full-Stack Web Engineering",
-            preview: "https://res.cloudinary.com/dmrhe3chc/image/upload/v1770999319/trinidax_school_certificate_suu4u7.jpg", 
-            pdf: "/trinidax.pdf" 
+            preview: "https://res.cloudinary.com/dmrhe3chc/image/upload/v1770999319/trinidax_school_certificate_suu4u7.jpg",
+            pdf: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf", // replace with actual PDF
+            qr: "" // e.g. "https://example.com/qr/trin-26-001.png" – leave empty to use dynamic QR
         },
         "TRIN-26-002": {
             name: "Emily Chen",
             course: "Data Science & AI",
-            preview: "https://res.cloudinary.com/dmrhe3chc/image/upload/v1770999319/trinidax_school_certificate_suu4u7.jpg", 
-            pdf: "/trinidax.pdf" 
+            preview: "https://res.cloudinary.com/dmrhe3chc/image/upload/v1770999319/trinidax_school_certificate_suu4u7.jpg",
+            pdf: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+            qr: "" // add static QR URL if desired
         },
         "TRIN-26-003": {
             name: "Michael Lee",
             course: "Cybersecurity Fundamentals",
-            preview: "https://res.cloudinary.com/dmrhe3chc/image/upload/v1770999319/trinidax_school_certificate_suu4u7.jpg", 
-            pdf: "/trinidax.pdf" 
+            preview: "https://res.cloudinary.com/dmrhe3chc/image/upload/v1770999319/trinidax_school_certificate_suu4u7.jpg",
+            pdf: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+            qr: "" // add static QR URL if desired
         }
     };
 
-    // --- AUTO POPUP LOGIC ---
+    // -------------------- LOCKOUT STATE --------------------
+    let wrongAttempts = parseInt(localStorage.getItem('wrongAttempts')) || 0;
+    let firstWrongTime = parseInt(localStorage.getItem('firstWrongTime')) || null;
+    const LOCKOUT_LIMIT = 5;
+    const LOCKOUT_DURATION = 60 * 60 * 1000; // 1 hour
+
+    function isLocked() {
+        if (!firstWrongTime) return false;
+        const now = Date.now();
+        if (wrongAttempts >= LOCKOUT_LIMIT && (now - firstWrongTime) < LOCKOUT_DURATION) {
+            return true;
+        } else if ((now - firstWrongTime) >= LOCKOUT_DURATION) {
+            resetLockout();
+            return false;
+        }
+        return false;
+    }
+
+    function resetLockout() {
+        wrongAttempts = 0;
+        firstWrongTime = null;
+        localStorage.removeItem('wrongAttempts');
+        localStorage.removeItem('firstWrongTime');
+        updateLockoutUI();
+    }
+
+    function incrementWrongAttempts() {
+        const now = Date.now();
+        if (!firstWrongTime) {
+            firstWrongTime = now;
+            localStorage.setItem('firstWrongTime', firstWrongTime);
+        }
+        wrongAttempts++;
+        localStorage.setItem('wrongAttempts', wrongAttempts);
+        updateLockoutUI();
+
+        if (wrongAttempts === 3) {
+            showWarning("You have entered an incorrect ID 3 times. After 5 wrong attempts, you will be locked out for 1 hour.");
+        }
+    }
+
+    function updateLockoutUI() {
+        const input = document.getElementById('certInput');
+        const verifyBtn = document.getElementById('verifyBtn');
+        const searchBox = document.getElementById('searchBox');
+        const lockoutDiv = document.getElementById('lockoutMessage');
+
+        if (isLocked()) {
+            input.disabled = true;
+            verifyBtn.disabled = true;
+            searchBox.classList.add('disabled');
+
+            const remaining = LOCKOUT_DURATION - (Date.now() - firstWrongTime);
+            const minutes = Math.floor(remaining / 60000);
+            const seconds = Math.floor((remaining % 60000) / 1000);
+            lockoutDiv.textContent = `Too many failed attempts. Please wait ${minutes}m ${seconds}s before trying again.`;
+
+            if (!window.lockoutInterval) {
+                window.lockoutInterval = setInterval(() => {
+                    if (isLocked()) {
+                        const remaining = LOCKOUT_DURATION - (Date.now() - firstWrongTime);
+                        if (remaining <= 0) {
+                            clearInterval(window.lockoutInterval);
+                            window.lockoutInterval = null;
+                            resetLockout();
+                            input.disabled = false;
+                            verifyBtn.disabled = false;
+                            searchBox.classList.remove('disabled');
+                            lockoutDiv.textContent = '';
+                        } else {
+                            const minutes = Math.floor(remaining / 60000);
+                            const seconds = Math.floor((remaining % 60000) / 1000);
+                            lockoutDiv.textContent = `Too many failed attempts. Please wait ${minutes}m ${seconds}s before trying again.`;
+                        }
+                    } else {
+                        clearInterval(window.lockoutInterval);
+                        window.lockoutInterval = null;
+                    }
+                }, 1000);
+            }
+        } else {
+            input.disabled = false;
+            verifyBtn.disabled = false;
+            searchBox.classList.remove('disabled');
+            lockoutDiv.textContent = '';
+            if (window.lockoutInterval) {
+                clearInterval(window.lockoutInterval);
+                window.lockoutInterval = null;
+            }
+        }
+    }
+
+    // -------------------- MODAL FUNCTIONS --------------------
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = "none";
+    }
+
+    function showWarning(message) {
+        document.getElementById('warningMessage').innerText = message;
+        document.getElementById('warningModal').style.display = "block";
+    }
+
+    // -------------------- AUTO INSTRUCTION POPUP --------------------
     window.onload = function() {
-        // Track refreshes using localStorage
         let refreshCount = localStorage.getItem('refreshCount') || 0;
         refreshCount++;
         localStorage.setItem('refreshCount', refreshCount);
 
-        // Logic: Popup every 2nd refresh
         if (refreshCount % 2 === 0) {
-            setTimeout(showInstructions, 4000); // 4 Second delay
+            setTimeout(showInstructions, 4000);
+        }
+
+        updateLockoutUI();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const idFromUrl = urlParams.get('id');
+        if (idFromUrl) {
+            document.getElementById('certInput').value = idFromUrl;
+            checkID();
         }
     };
 
     function showInstructions() {
         const modal = document.getElementById('resultModal');
-        const instructionDiv = document.getElementById('instructionContent');
-        const successDiv = document.getElementById('successContent');
-        const errorDiv = document.getElementById('errorContent');
-
-        instructionDiv.style.display = 'block';
-        successDiv.style.display = 'none';
-        errorDiv.style.display = 'none';
+        document.getElementById('instructionContent').style.display = 'block';
+        document.getElementById('successContent').style.display = 'none';
+        document.getElementById('errorContent').style.display = 'none';
         modal.style.display = "block";
     }
 
+    // -------------------- VERIFICATION --------------------
     function checkID() {
+        if (isLocked()) {
+            showWarning("You are currently locked out due to too many failed attempts. Please wait.");
+            return;
+        }
+
         const id = document.getElementById('certInput').value.trim().toUpperCase();
         const modal = document.getElementById('resultModal');
+        const instructionDiv = document.getElementById('instructionContent');
         const successDiv = document.getElementById('successContent');
         const errorDiv = document.getElementById('errorContent');
-        const instructionDiv = document.getElementById('instructionContent');
 
-        instructionDiv.style.display = 'none'; // Hide instructions if user is searching
+        instructionDiv.style.display = 'none';
 
         if (database[id]) {
+            resetLockout();
+
             document.getElementById('studentName').innerText = database[id].name;
             document.getElementById('courseName').innerText = database[id].course;
             document.getElementById('certPreview').src = database[id].preview;
-            document.getElementById('pdfLink').href = database[id].pdf;
+            window.currentPdfUrl = database[id].pdf;
+
+            // ----- Set the QR code image -----
+            const qrImg = document.getElementById('qrCodeImg');
+            if (database[id].qr) {
+                // Use the pre‑generated static QR code if provided
+                qrImg.src = database[id].qr;
+            } else {
+                // Otherwise fall back to dynamic generation
+                const baseUrl = window.location.href.split('?')[0];
+                const verificationUrl = `${baseUrl}?id=${encodeURIComponent(id)}`;
+                qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(verificationUrl)}`;
+            }
+
             successDiv.style.display = 'block';
             errorDiv.style.display = 'none';
         } else {
+            incrementWrongAttempts();
             successDiv.style.display = 'none';
             errorDiv.style.display = 'block';
         }
         modal.style.display = "block";
     }
 
-    function closeModal() {
-        document.getElementById('resultModal').style.display = "none";
+    // -------------------- CERTIFICATE ACTIONS --------------------
+    function viewCertificate() {
+        if (window.currentPdfUrl) {
+            const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(window.currentPdfUrl)}&embedded=true`;
+            window.open(viewerUrl, '_blank');
+        }
     }
 
-    window.onclick = function(event) {
-        if (event.target == document.getElementById('resultModal')) {
-            closeModal();
+    function downloadCertificate() {
+        if (window.currentPdfUrl) {
+            const a = document.createElement('a');
+            a.href = window.currentPdfUrl;
+            a.download = 'certificate.pdf';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
+    }
+
+    // -------------------- CLICK OUTSIDE MODAL --------------------
+    window.onclick = function(event) {
+        const modals = ['resultModal', 'warningModal'];
+        modals.forEach(id => {
+            const modal = document.getElementById(id);
+            if (event.target == modal) {
+                closeModal(id);
+            }
+        });
     }
 </script>
 
